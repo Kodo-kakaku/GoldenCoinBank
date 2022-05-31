@@ -1,5 +1,7 @@
-import GoldenCoinBank.Account;
-import GoldenCoinBank.Client;
+import ClientInfo.Account;
+import ClientInfo.Client;
+import ClientInfo.Id;
+import GoldenCoinBank.Bank;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
@@ -10,90 +12,88 @@ public class GoldenCoinBankTest {
     @Test
     @DisplayName("Checking for correctness of comparison")
     public void equalsTest() {
-        Account firstAcc = new Account(1, "1", "5");
-        Account secondAcc = new Account(1, "1", "5");
-        Account lastAcc = new Account(2, "1", "5");
+        System.out.println("Start equals test");
+        Account firstAcc = new Account(new Id(1L), "5");
+        Account secondAcc = new Account(new Id(1L), "1");
+        Account lastAcc = new Account(new Id(2L), "323");
 
         Assertions.assertFalse(firstAcc.equals(null));
         Assertions.assertFalse(firstAcc.equals(lastAcc));
 
         Assertions.assertTrue(firstAcc.equals(firstAcc));
         Assertions.assertTrue(firstAcc.equals(secondAcc));
-
+        System.out.println("Equals test: OK\n");
     }
 
     @Test
     @DisplayName("Find client account")
     public void findAccountInCollections() {
-        Client firstClient = new Client(1, 18, "Pavel");
-        Client secondClient = new Client(2,16, "Kate");
-        Client lastClient = new Client(3,18, "Antony");
 
-        Account firstClientAccounts = new Account(1, "1", "5");
-        Account secondClientAccounts = new Account(2, "1", "5");
-        Account lastClientAccounts = new Account(3, "1", "5");
+        final Id pavelId = new Id(1L);
+        final Id kateId = new Id(2L);
+        final Id antonyId = new Id(3L);
 
-        Map<Client, Account> bankWithClientsAndGoldenCoins = new HashMap<>();
-        bankWithClientsAndGoldenCoins.put(firstClient, firstClientAccounts);
-        bankWithClientsAndGoldenCoins.put(secondClient, secondClientAccounts);
-        bankWithClientsAndGoldenCoins.put(lastClient, lastClientAccounts);
+        Bank bank = new Bank();
 
-        System.out.println("Find client account in map:");
-        System.out.printf("Client id: %d, fined account id: %d\n",
-                firstClientAccounts.getId(), bankWithClientsAndGoldenCoins.get(firstClient).getId());
-        Assertions.assertEquals(firstClientAccounts.getId(), bankWithClientsAndGoldenCoins.get(firstClient).getId());
+        bank.createNewClient(pavelId, 18, "Pavel");
+        bank.createNewClient(kateId, 16, "Kate");
+        bank.createNewClient(antonyId, 32, "Antony");
 
-        System.out.printf("Client id: %d, fined account id: %d\n",
-                secondClientAccounts.getId(), bankWithClientsAndGoldenCoins.get(secondClient).getId());
-        Assertions.assertEquals(secondClientAccounts.getId(), bankWithClientsAndGoldenCoins.get(secondClient).getId());
+        Client pavel = bank.getClientById(pavelId);
+        Client kate = bank.getClientById(kateId);
+        Client antony = bank.getClientById(antonyId);
 
-        System.out.printf("Client id: %d, fined account id: %d\n",
-                lastClientAccounts.getId(), bankWithClientsAndGoldenCoins.get(lastClient).getId());
-        Assertions.assertEquals(lastClientAccounts.getId(), bankWithClientsAndGoldenCoins.get(lastClient).getId());
+        System.out.println("Find client account by ID in BANK:");
+        System.out.printf("Client id: %d, fined client id: %d, client name: %s\n",
+                pavelId.id(), pavel.getId().id(), pavel.getName());
+        Assertions.assertEquals(pavelId.id(), pavel.getId().id());
+
+        System.out.printf("Client id: %d, fined client id: %d, client name: %s\n",
+                kateId.id(), kate.getId().id(), kate.getName());
+        Assertions.assertEquals(kateId.id(), kate.getId().id());
+
+        System.out.printf("Client id: %d, fined client id: %d, client name: %s\n\n",
+                antonyId.id(), antony.getId().id(), antony.getName());
+        Assertions.assertEquals(antonyId.id(), antony.getId().id());
     }
 
     @Test
     @DisplayName("Find client by account")
     public void findClientInCollections() {
-        Client firstClient = new Client(1, 18, "Pavel");
-        Client secondClient = new Client(2, 16, "Kate");
-        Client lastClient = new Client(3, 18, "Antony");
+        final Id pavelId = new Id(1L);
+        final Id kateId = new Id(2L);
+        final Id antonyId = new Id(3L);
 
-        Account firstClientAccounts = new Account(1, "1", "5");
-        Account secondClientAccounts = new Account(2, "1", "5");
-        Account lastClientAccounts = new Account(3, "1", "5");
+        Bank bank = new Bank();
 
-        Map<Client, Account> bankWithClientsAndGoldenCoins = new HashMap<>();
-        bankWithClientsAndGoldenCoins.put(firstClient, firstClientAccounts);
-        bankWithClientsAndGoldenCoins.put(secondClient, secondClientAccounts);
-        bankWithClientsAndGoldenCoins.put(lastClient, lastClientAccounts);
+        bank.createNewClient(pavelId, 18, "Pavel");
+        bank.createNewClient(kateId, 16, "Kate");
+        bank.createNewClient(antonyId, 32, "Antony");
 
+        Client pavel = bank.getClientById(pavelId);
+        Client kate = bank.getClientById(kateId);
+        Client antony = bank.getClientById(antonyId);
 
-        Set<Map.Entry<Client, Account>> entries = bankWithClientsAndGoldenCoins.entrySet();
+        bank.addClientAccount(pavel, "1111");
+        bank.addClientAccount(kate, "2222");
+        bank.addClientAccount(antony, "3333");
 
-        System.out.println("Find client account in map:");
-        for(Map.Entry<Client, Account> entry: entries) {
-            if (entry.getValue().equals(secondClientAccounts)) {
-                System.out.printf("Client id: %d, fined account id: %d\n",
-                        entry.getKey().getId(), secondClientAccounts.getId());
-                Assertions.assertEquals(entry.getKey().getId(), secondClientAccounts.getId());
-            }
-        }
+        Account pavelAccount = new Account(pavelId, "11111");
+        Account kateAccount = new Account(kateId, "33333");
+        Account antonyAccount = new Account(antonyId, "2313123");
 
-        for(Map.Entry<Client, Account> entry: entries) {
-            if (entry.getValue().equals(lastClientAccounts)) {
-                System.out.printf("Client id: %d, fined account id: %d\n",
-                        entry.getKey().getId(), lastClientAccounts.getId());
-                Assertions.assertEquals(entry.getKey().getId(), lastClientAccounts.getId());
-            }
-        }
+        Client someClient1 = bank.getClientByAccount(pavelAccount);
+        Client someClient2 = bank.getClientByAccount(kateAccount);
+        Client someClient3 = bank.getClientByAccount(antonyAccount);
 
-        for(Map.Entry<Client, Account> entry: entries) {
-            if (entry.getValue().equals(firstClientAccounts)) {
-                System.out.printf("Client id: %d, fined account id: %d\n\n",
-                        entry.getKey().getId(), firstClientAccounts.getId());
-                Assertions.assertEquals(entry.getKey().getId(), firstClientAccounts.getId());
-            }
-        }
+        System.out.println("Find client by account in BANK:");
+        System.out.printf("Account id: %d, fined account id: %d\n", pavelAccount.getId().id(), someClient1.getId().id());
+        Assertions.assertEquals(pavelAccount.getId().id(), someClient1.getId().id());
+
+        System.out.printf("Account id: %d, fined account id: %d\n", kateAccount.getId().id(), someClient2.getId().id());
+        Assertions.assertEquals(kateAccount.getId().id(), someClient2.getId().id());
+
+        System.out.printf("Account id: %d, fined account id: %d\n\n", antonyAccount.getId().id(), someClient3.getId().id());
+        Assertions.assertEquals(antonyAccount.getId().id(), someClient3.getId().id());
     }
 }
